@@ -12,27 +12,34 @@ const pairs = [
   ["AUD", "JPY"], ["EUR", "AUD"], ["NZD", "JPY"], ["CAD", "JPY"]
 ];
 
-const API_KEY = "a926e4628f60909aefa2e27ec8fc7c6b";
-
 app.get('/rates', async (req, res) => {
-  const results = {};
+  try {
+    const responses = {}; // نرخ‌ها
 
-  for (let [base, quote] of pairs) {
-    try {
-      const url = `https://api.exchangerate.host/convert?from=${base}&to=${quote}&access_key=${API_KEY}`;
+    // گرفتن نرخ‌ها برای ارزهای پایه مختلف
+    const baseSet = new Set(pairs.map(p => p[0]));
+
+    for (let base of baseSet) {
+      const url = `https://open.er-api.com/v6/latest/${base}`;
       const response = await axios.get(url);
-
-      if (response.data && typeof response.data.result === 'number') {
-        results[`${base}/${quote}`] = parseFloat(response.data.result).toFixed(4);
-      } else {
-        results[`${base}/${quote}`] = "-";
-      }
-    } catch (err) {
-      results[`${base}/${quote}`] = "-";
+      responses[base] = response.data.rates;
     }
-  }
 
-  res.json(results);
+    // ساخت خروجی نهایی
+    const result = {};
+    for (let [base, quote] of pairs) {
+      if (responses[base] && responses[base][quote]) {
+        result[`${base}/${quote}`] = responses[base][quote].toFixed(4);
+      } else {
+        result[`${base}/${quote}`] = "-";
+      }
+    }
+
+    res.json(result);
+  } catch (err) {
+    console.error("Error fetching rates:", err.message);
+    res.status(500).json({ error: "Failed to fetch rates" });
+  }
 });
 
 const PORT = process.env.PORT || 3000;
