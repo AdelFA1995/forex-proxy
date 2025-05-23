@@ -12,20 +12,21 @@ const pairs = [
   ["AUD", "JPY"], ["EUR", "AUD"], ["NZD", "JPY"], ["CAD", "JPY"]
 ];
 
+const API_KEY = "a926e4628f60909aefa2e27ec8fc7c6b";
+
 app.get('/rates', async (req, res) => {
   const results = {};
 
   for (let [base, quote] of pairs) {
     try {
-      const url = `https://api.exchangerate.host/convert?from=${base}&to=${quote}`;
+      const url = `https://api.exchangerate.host/convert?from=${base}&to=${quote}&apikey=${API_KEY}`;
       const response = await axios.get(url);
 
-      if (response.data && response.data.result) {
+      if (response.data && typeof response.data.result === 'number') {
         results[`${base}/${quote}`] = parseFloat(response.data.result).toFixed(4);
       } else {
         results[`${base}/${quote}`] = "-";
       }
-
     } catch (err) {
       results[`${base}/${quote}`] = "-";
     }
