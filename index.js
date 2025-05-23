@@ -19,7 +19,7 @@ app.get('/rates', async (req, res) => {
 
   for (let [base, quote] of pairs) {
     try {
-      const url = `https://api.exchangerate.host/convert?from=${base}&to=${quote}&apikey=${API_KEY}`;
+      const url = `https://api.exchangerate.host/convert?from=${base}&to=${quote}&access_key=${API_KEY}`;
       const response = await axios.get(url);
 
       if (response.data && typeof response.data.result === 'number') {
